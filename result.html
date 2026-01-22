@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผลลัพธ์ BMI</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+body{ font-family:"Kanit",sans-serif; text-align:center; background:#f8f9fa; margin:0; }
+.result{ margin-top:20px; font-size:20px; font-weight:bold; }
+canvas{ margin-top:20px; }
+table{ margin:20px auto; border-collapse:collapse; width:80%; }
+th,td{ border:1px solid #ccc; padding:8px; text-align:center; }
+th{ background:#eee; }
+    h1 {
+      font-size: 60px;
+      margin-bottom: 2px;
+      color: #353535;
+    }
+/* Chatbot ลอยขวาล่าง */
+#chatBtn{ 
+  position:fixed; 
+  bottom:20px; 
+  right:20px; 
+  width:60px; 
+  height:60px; 
+  border-radius:50%; 
+  background:#000000; 
+  color:#fff; 
+  border:none; 
+  cursor:pointer; 
+  font-size:30px; 
+}
+#chatBtn:active {
+  transform: scale(0.9);
+}
+#chatBox{
+  box-shadow:  18px 18px 68px #acacac,
+-18px -18px 68px #ffffff; 
+  display:none; 
+  position:fixed; 
+  bottom:90px; 
+  right:20px; 
+  width:300px; 
+  height:400px; 
+  background:#fff; 
+  border:1px solid #ddd; 
+  border-radius:10px;
+  padding:10px; 
+  overflow:auto; 
+}
+#chatContent{
+  margin-bottom: 40px;
+  height:320px;
+  overflow-y:auto;
+  font-family:sans-serif;
+  font-size:14px;
+}
+#chatInput{
+  width:75%; 
+  padding:5px; 
+  border:none; 
+  background:#f1f1f1; 
+  border-radius:5px;
+}
+#sendBtn {
+  margin-left: 10px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #000000;   
+  border-radius: 20%; 
+  cursor: pointer;
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+#sendBtn img {
+  max-width: 100%;
+  margin-bottom: -5px;
+  width: 20px; 
+  height: 20px;
+  object-fit: contain;
+  filter: invert(1);
+  pointer-events: none;  
+}
+#sendBtn:active {
+  transform: scale(0.9);
+}
+#backBtn {
+  position: fixed;
+  top: 20px;      
+  left:20px;    
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 100; 
+}
+
+#backBtn img.back {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+#backBtn:active {
+  transform: scale(0.9);
+}
+table {
+  margin: 20px auto;
+  border-collapse: collapse;
+  width: 80%;
+  border: none;
+  border: 1px solid #4d4d4d;
+  border-radius: 10px;
+  overflow: hidden;
+background: #ffffff;
+box-shadow:  9px 9px 32px #e6e6e6,
+             -9px -9px 32px #ffffff;
+}
+
+th, td {
+  border:none;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #cecece;
+}
+/* ฟองแชทแบบไอจี */
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  margin: 8px 0;
+  border-radius: 18px;
+  font-family: "Kanit", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  display: inline-block;
+}
+
+.userMsg {
+  background: #d1f0ff;
+  color: #000;
+  float: right;
+  clear: both;
+  border-bottom-right-radius: 5px;
+}
+
+.botMsg {
+  background: #f1f1f1;
+  color: #000;
+  float: left;
+  clear: both;
+  border-bottom-left-radius: 5px;
+}
+
+/* ปรับช่องใส่ข้อความให้ฟ้อนถูก */
+#chatInput {
+  width: 75%;
+  padding: 5px;
+  border: none;
+  background: #f1f1f1;
+  border-radius: 5px;
+  font-family: "Kanit", sans-serif;
+}
+</style>
+</head>
+<body>
+<a href="index.html" id="backBtn">
+  <img class="back" src="sorn.png" alt="back">
+</a>
+
+<h1>ผลลัพธ์ BMI ของคุณ</h1>
+<div id="result" class="result"></div>
+<canvas id="bmiChart" width="400" height="150"></canvas>
+
+<h2 style="margin: 30px">ประวัติการคำนวณ</h2>
+<table id="historyTable">
+  <thead>
+  <tr>
+    <th>วันที่</th>
+    <th>BMI</th>
+    <th>สถานะ</th>
+  </tr>
+</thead>
+  <tbody></tbody>
+</table>
+
+<button id="chatBtn">💬</button>
+<div id="chatBox">
+  <div id="chatContent"></div>
+  <input id="chatInput" style="font-family: Kanit", sans-serif; placeholder="      พิมพ์ข้อความ . . .">
+  <button id="sendBtn"><img style="max-width: 100%" src="send.png" alt="send"></button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let bmiData = JSON.parse(localStorage.getItem('bmiData'));
+if(!bmiData){ alert("ไม่มีข้อมูล BMI"); window.location.href='index.html'; }
+
+let {sex, age, height, heightUnit, weight, weightUnit}=bmiData;
+
+// แปลงหน่วย
+if(heightUnit==='ft/in'){ height=height*30.48; }
+if(weightUnit==='lb'){ weight=weight*0.453592; }
+
+const heightM=height/100;
+const bmi=weight/(heightM*heightM);
+let status='', advice='';
+if(bmi<18.5){ status='ผอม'; advice='เพิ่มอาหารโปรตีนและคาร์โบไฮเดรต ออกกำลังกายเสริมกล้ามเนื้อ'; }
+else if(bmi<25){ status='ปกติ'; advice='รักษาน้ำหนัก ควบคุมอาหารและออกกำลังกายสม่ำเสมอ'; }
+else if(bmi<30){ status='น้ำหนักเกิน'; advice='ลดอาหารหวานมัน ออกกำลังกายคาร์ดิโอ'; }
+else{ status='โรคอ้วน'; advice='ปรึกษาแพทย์ ลดน้ำหนัก ควบคุมอาหารและออกกำลังกาย'; }
+
+document.getElementById('result').innerHTML=`BMI: ${bmi.toFixed(2)} (${status})<br>คำแนะนำ: ${advice}`;
+
+// บันทึกประวัติ
+let history = JSON.parse(localStorage.getItem('bmiHistory')||'[]');
+history.push({date:new Date().toLocaleString(), bmi:bmi.toFixed(2), status});
+localStorage.setItem('bmiHistory', JSON.stringify(history));
+
+// แสดงประวัติ
+const tbody=document.querySelector('#historyTable tbody');
+tbody.innerHTML='';
+history.slice(-10).reverse().forEach(item=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${item.date}</td><td>${item.bmi}</td><td>${item.status}</td>`;
+  tbody.appendChild(tr);
+});
+
+// วาดกราฟ
+const ctx=document.getElementById('bmiChart').getContext('2d');
+const labels=history.slice(-10).map(h=>h.date);
+const data=history.slice(-10).map(h=>h.bmi);
+new Chart(ctx,{
+  type:'line',
+  data:{ labels, datasets:[{ label:'BMI', data, borderColor:'rgba(75,192,192,1)', backgroundColor:'rgba(75,192,192,0.2)', fill:true, tension:0.3 }] },
+  options:{ scales:{ y:{ beginAtZero:true, min:10, max:40 } } }
+});
+
+// ระบบแชท IG
+const chatBtn = document.getElementById('chatBtn');
+const chatBox = document.getElementById('chatBox');
+const chatContent = document.getElementById('chatContent');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+chatBtn.onclick = () => {
+  chatBox.style.display = (chatBox.style.display === 'none' ? 'block' : 'none');
+};
+
+// ส่งข้อความ
+sendBtn.onclick = () => {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  // ผู้ใช้ (ขวา)
+  const userBubble = document.createElement('div');
+  userBubble.className = "message userMsg";
+  userBubble.textContent = msg;
+  chatContent.appendChild(userBubble);
+
+  chatInput.value = '';
+
+  // บอทตอบ
+  let reply = "";
+  if (msg.includes("อาหาร")) reply = "แนะนำอาหาร: เน้นโปรตีน ผัก ผลไม้ ลดน้ำตาลนะ!";
+  else if (msg.includes("กิน")) reply = "แนะนำอาหาร: เน้นโปรตีน ผัก ผลไม้ ลดน้ำตาลนะ!";
+  else if (msg.includes("ออกกำลังกาย")) reply = "ออกกำลังกาย: เดินเร็ว 30 นาที หรือวิ่งก็ได้ครับ!";
+  else if (msg.includes("BMI")) reply = "BMI (Body Mass Index) หรือดัชนีมวลกาย คือ ตัวชี้วัดมาตรฐานที่ใช้ประเมินความสมดุลของน้ำหนักตัวต่อส่วนสูง เพื่อดูว่าน้ำหนักอยู่ในเกณฑ์ปกติ, ผอมเกินไป, หรืออ้วนเกินไป";
+  else reply = "ผมช่วยได้เรื่อง BMI สุขภาพ อาหาร และออกกำลังกายนะ 😊";
+
+  // บอท (ซ้าย)
+  const botBubble = document.createElement('div');
+  botBubble.className = "message botMsg";
+  botBubble.textContent = reply;
+  chatContent.appendChild(botBubble);
+
+  // เลื่อนลงอัตโนมัติ
+  chatContent.scrollTop = chatContent.scrollHeight;
+};
+</script>
+</body>
+</html>
